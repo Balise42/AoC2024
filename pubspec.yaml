@@ -1,0 +1,5 @@
+name: AoC2024
+environment:
+  sdk: '^3.5.4'
+dependencies:
+  collection: ^1.19.1
