@@ -1,5 +1,4 @@
 import "utils.dart";
-import "package:collection/collection.dart";
 
 void main() {
   var l1 = <int>[];
