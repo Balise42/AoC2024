@@ -4,7 +4,7 @@ import "package:collection/collection.dart";
 void main() {
   var l1 = <int>[];
   var l2 = <int>[];
-  for (var line in fileToStrings('./data/day01.dat')) {
+  for (var line in fileToStrings('./data/day01-sample.dat')) {
     var toks = line.split('   ');
     l1.add(int.parse(toks[0]));
     l2.add(int.parse(toks[1]));
