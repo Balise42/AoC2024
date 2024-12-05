@@ -1,7 +1,7 @@
 import "utils.dart";
 
 void main() {
-  List<String> lines = fileToStrings('./data/day05-sample.dat');
+  List<String> lines = fileToStrings('./data/day05.dat');
   Set<Record> rules = {};
 
   var part1 = 0;
@@ -47,6 +47,7 @@ List<int> reorder(List<int> pages, Set<Record> rules) {
         var tmp = pages[i];
         pages[i] = pages[j];
         pages[j] = tmp;
+        j = i+1;
       }
     }
   }
