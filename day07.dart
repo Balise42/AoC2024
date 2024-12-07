@@ -31,9 +31,6 @@ int countWays(int target, List<int> numbers, bool part2) {
   if (target < 0) {
     return 0;
   }
-  if (numbers.length == 0) {
-    return target == 0 ? 1 : 0;
-  }
   if (numbers.length == 1) {
     return target == numbers[0] ? 1 : 0;
   }
