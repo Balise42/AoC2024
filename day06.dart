@@ -53,18 +53,15 @@ void main() {
   var res = 0;
   for (var line in lines) {
     for (var col in cols) {
-      var newGrid = <List<String>>[];
-      for (int i = 0; i<grid.length; i++) {
-        newGrid.add([]);
-        for (int j = 0; j<grid[i].length; j++) {
-          newGrid[i].add(grid[i][j]);
-        }
+      if (grid[line][col] == '#') {
+        continue;
       }
-      newGrid[line][col] = '#';
+      grid[line][col] = '#';
       guard = {'l': y, 'c': x, 'dL': -1, 'dC': 0};
-      if (visitGrid(newGrid, guard) == -1) {
+      if (visitGrid(grid, guard) == -1) {
         res++;
       }
+      grid[line][col] = '.';
     }
   }
   print(res);
