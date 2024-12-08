@@ -1,7 +1,7 @@
 import "utils.dart";
 
 void main() {
-  var input = fileToStrings('./data/day08.dat');
+  var input = fileToStrings('./data/day08-sample.dat');
 
   Map<String, List<(int, int)>> antennas = {};
 
@@ -17,6 +17,7 @@ void main() {
   }
 
   Set<Record> antinodes = {};
+  Set<Record> antinodesP2 = {};
 
   for (List<(int, int)> list in antennas.values) {
     if (list.length < 2) {
@@ -35,10 +36,26 @@ void main() {
         if (isValid(candidate, input.length, input[0].length)) {
           antinodes.add(candidate);
         }
+
+        var gcd = (i1.$1 - i2.$1).gcd(i1.$2 - i2.$2);
+        var stepLine = (i1.$1 - i2.$1); ~/ gcd;
+        var stepCol = (i1.$2 - i2.$2); ~/ gcd;
+
+        candidate = i1;
+        while(isValid(candidate, input.length, input[0].length)) {
+          antinodesP2.add(candidate);
+          candidate = (candidate.$1 + stepLine, candidate.$2 + stepCol);
+        }
+        candidate = i2;
+        while(isValid(candidate, input.length, input[0].length)) {
+          antinodesP2.add(candidate);
+          candidate = (candidate.$1 - stepLine, candidate.$2 - stepCol);
+        }
       }
     }
   }
   print(antinodes.length);
+  print(antinodesP2.length);
 }
 
 bool isValid((int, int) candidate, int numLines, int numCols) {
