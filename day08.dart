@@ -38,8 +38,8 @@ void main() {
         }
 
         var gcd = (i1.$1 - i2.$1).gcd(i1.$2 - i2.$2);
-        var stepLine = (i1.$1 - i2.$1); ~/ gcd;
-        var stepCol = (i1.$2 - i2.$2); ~/ gcd;
+        var stepLine = (i1.$1 - i2.$1) ~/ gcd;
+        var stepCol = (i1.$2 - i2.$2) ~/ gcd;
 
         candidate = i1;
         while(isValid(candidate, input.length, input[0].length)) {
