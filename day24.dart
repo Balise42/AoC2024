@@ -23,15 +23,12 @@ class Gate {
     } else if (this.op == 'XOR') {
       this.out = state.knownValues[this.i1]! ^ state.knownValues[this.i2]!;
     }
-    if (state.knownValues.containsKey(this.val) && state.knownValues[val] != this.out) {
-      throw "inconsistent state";
-    }
     state.knownValues[this.val] = this.out!;
   }
 
   @override
   String toString() {
-    return 'Gate{val: $val}';
+    return 'Gate{$i1 $op $i2 => $val}';
   }
 
   @override
@@ -53,6 +50,9 @@ class State {
   Map<String, bool> knownValues = {};
   Map<String, List<Gate>> unknown = {};
   Map<String, Gate> gates = {};
+  Map<String, List<Gate>> children = {};
+  Set<String> xs = {};
+  Set<String> ys = {};
 
   void cascade(var val) {
     if (this.unknown.containsKey(val)) {
@@ -74,6 +74,10 @@ class State {
   void addGate(String val, String i1, String i2, String op) {
     var gate = Gate(val, i1, i2, op);
     this.gates[val] = gate;
+    this.children.putIfAbsent(i1, () => <Gate>[]);
+    this.children.putIfAbsent(i2, () => <Gate>[]);
+    this.children[i1]!.add(gate);
+    this.children[i2]!.add(gate);
     if (gate.canCompute(this)) {
       gate.compute(this);
     }
@@ -95,19 +99,21 @@ class State {
     this.knownValues[val] = b;
     cascade(val);
   }
-  
-  void reset() {
-    this.unknown = {};
-    for (var gate in this.gates.values) {
-      gate.out = null;
-      this.addUnknown(gate);
+
+  int getNum(String prefix) {
+    int res = 0;
+    for (var entry in this.knownValues.entries) {
+      if (entry.key.startsWith(prefix)) {
+        var exp = int.parse(entry.key.substring(1));
+        res += entry.value ? pow(2, exp).toInt() : 0;
+      }
     }
-    this.knownValues = {};
+    return res;
   }
 }
 
 void main() {
-  List<String> lines = fileToStrings("./data/day24.dat");
+  List<String> lines = fileToStrings("./data/day24-fixed.dat");
   var state = State();
   var readGates = false;
   for (String line in lines) {
@@ -118,6 +124,11 @@ void main() {
     if (!readGates) {
       var toks = line.split(": ");
       state.addKnownValue(toks[0], toks[1] == '1' ? true : false);
+      if (toks[0].startsWith('x')) {
+        state.xs.add(toks[0]);
+      }if (toks[0].startsWith('x')) {
+        state.ys.add(toks[0]);
+      }
       continue;
     } else {
       var toks = line.split(" ");
@@ -129,13 +140,70 @@ void main() {
     }
   }
 
-  var values = Map.from(state.knownValues);
-  values.removeWhere((key, value) => !key.startsWith('z'));
-  var maxPos = values.length;
-  var res = 0;
-  for (var i = 0; i < maxPos; i++) {
-    var varName = "z" + i.toString().padLeft(2, '0');
-    res += values[varName]! ? pow(2, i).toInt() : 0;
+  print(state.getNum('z'));
+
+  /*z = x xor y xor prevcarry;
+  carry = (x and y) or (prevcarry and (x xor y));
+
+  P = x xor y
+  Q = x and y
+  Z = P xor prevcarry
+  carry = Q or R
+  R = prevcarry AND P*/
+
+  Map<(String, String, String), Gate> gateByInput = {};
+  for (var gate in state.gates.values) {
+    gateByInput[(gate.i1, gate.i2, gate.op)] = gate;
+    gateByInput[(gate.i2, gate.i1, gate.op)] = gate;
   }
-  print(res);
+
+  var prevCarry = 'rjr';
+  for (var i = 1; i<45; i++) {
+    print(i);
+    var x = 'x' + i.toString().padLeft(2, '0');
+    var y = 'y' + i.toString().padLeft(2, '0');
+    var z = 'z' + i.toString().padLeft(2, '0');
+    var P = gateByInput[(x, y, 'XOR')];
+    if (P == null) {
+      print("no P");
+      break;
+    }
+    print("P: $P");
+    var Q = gateByInput[(x, y, 'AND')];
+    if (Q == null) {
+      print("no Q");
+      break;
+    }
+    print("Q: $Q");
+    var R = gateByInput[(P.val, prevCarry, 'AND')];
+    if (R == null) {
+      print("no R");
+      break;
+    }
+    print("R: $R");
+    var prevCarryGate = gateByInput[(R.val, Q.val, 'OR')];
+    if (prevCarryGate == null) {
+      print("no prevCarryGate");
+      break;
+    }
+    print("prevCarry: $prevCarryGate");
+    var Z = gateByInput[(P.val, prevCarry, 'XOR')];
+    if (Z == null) {
+      print("no Z");
+      break;
+    }
+    if (Z.val != z) {
+      print("wrong Z $Z");
+      break;
+    }
+    print("Z: $Z");
+    if (prevCarryGate == null) {
+      break;
+    }
+    prevCarry = prevCarryGate.val;
+  }
+
+  var res = ['hmt', 'z18', 'z27', 'bfq', 'z31', 'hkh', 'bng', 'fjp'];
+  res.sort();
+  print(res.join(','));
 }
